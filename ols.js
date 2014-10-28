@@ -89,15 +89,15 @@ var ols = function(datamatrix,marketingChannels){
 	var datamatrixy = datamatrix;
 	//console.log(datamatrix);
 //   (X_tX)^-1X'y  all the important matrices
-	var X = prepareX(datamatrix);	
+	//var X = prepareX(datamatrix);	
 
-	var Y = rowToColumn(prepareY(datamatrixy));
+	//var Y = rowToColumn(prepareY(datamatrixy));
 
 	
 //Just testing regression logic
  	//process.exit();
-	//var Y = [[1],[2],[1.3],[3.75],[2.25]]; 
-	//var X = [[1,1],[1,2],[1,3],[1,4],[1,5]];
+	var Y = [[1],[2],[1.3],[3.75],[2.25]]; 
+	var X = [[1,1],[1,2],[1,3],[1,4],[1,5]];
 
 	var X_t = numeric.transpose(X);
 	console.log('-------X-----');
@@ -163,10 +163,23 @@ console.log("\n");
     
     var Y_hat = numeric.dotMV(X,b);
 
-	calculateStandardError(Y_hat,Y);
+	var MSE  = calculateStandardError(Y_hat,Y);
+	
+	var Y_bar = calculateYBar(Y);
+	var sumOfSquares = totalSumOfSquares(Y,Y_bar);
 
+	var R = 1-MSE/sumOfSquares;
+	
+	console.log("-------R----------")
+	console.log(R + " %");
 
+	server_options = {
+    	files: {
+        	relativeTo: Path.join(__dirname, 'public')
+    	},
+	};
 
+	var server = new Hapi.Server('localhost', 5000, server_options);
  
 
 	server.route({
@@ -208,10 +221,34 @@ server.start();
 };
 
 function calculateStandardError(Y_hat,Y){
-	//console.log(Y_hat);
-	//console.log(Y);
+
+	var sum = 0;
+	for(i =0; i < Y.length; i ++){
+		sum += (Y_hat[i] - Y[i])*(Y_hat[i] - Y[i]);
+	}
+	return sum/Y.length;
 }
 
+function calculateYBar(Y){
+	var sum =0;
+	for(i=0; i < Y.length;i++){
+		sum = parseInt(Y[i],10);
+	
+	
+	}
+
+	return sum/Y.length;
+}
+
+function totalSumOfSquares(Y,Y_bar){
+	var sum  =0 ;
+	//console.log(Y, "   +    ",Y_bar);
+	for (i = 0; i <Y.length;i++){
+		sum += Y[i] - Y_bar;
+	}
+	return sum/Y.length;
+
+}
 
 function rowToColumn(vector){
 	var column = [[]];
@@ -296,7 +333,7 @@ function prepareY(datamatrix1){
 
 
 
-
+ols(null,null);
 
 
 module.exports.ols = ols;
