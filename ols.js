@@ -85,19 +85,19 @@ var rawData = [ [ 'rah_Ariel33',
 
 
 var ols = function(datamatrix,marketingChannels){
-	datamatrix = rawData;
+	datamatrix = datamatrix;
 	var datamatrixy = datamatrix;
 	//console.log(datamatrix);
 //   (X_tX)^-1X'y  all the important matrices
-	//var X = prepareX(datamatrix);	
+	var X = prepareX(datamatrix);	
 
-	//var Y = rowToColumn(prepareY(datamatrixy));
+	var Y = rowToColumn(prepareY(datamatrixy));
 
 	
 //Just testing regression logic
  	//process.exit();
-	var Y = [[1],[2],[1.3],[3.75],[2.25]]; 
-	var X = [[1,1],[1,2],[1,3],[1,4],[1,5]];
+	//var Y = [[1],[2],[1.3],[3.75],[2.25]]; 
+	//var X = [[1,1],[1,2],[1,3],[1,4],[1,5]];
 
 	var X_t = numeric.transpose(X);
 	console.log('-------X-----');
@@ -179,7 +179,7 @@ console.log("\n");
     	},
 	};
 
-	var server = new Hapi.Server('localhost', 5000, server_options);
+	var server = new Hapi.Server('localhost', 8665, server_options);
  
 
 	server.route({
@@ -333,7 +333,6 @@ function prepareY(datamatrix1){
 
 
 
-ols(null,null);
 
 
 module.exports.ols = ols;

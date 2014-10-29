@@ -22,6 +22,14 @@ form_data = {
         testMode: 'false'
     };
 
+
+
+    var workborkOptions = {
+          url: 'http://aus01-phx01.cm.emm.local:8080/analyticswebapp/reportview.do?method=addViewToWorkbook',
+          qs: {method:'addViewToWorkbook'},
+          form:'tabIndex=%2D1&viewId=default&reportURI=report%3A%2Fchannelsummary%2Fchannelsummary%2Eftl&workbookId=373711'
+    };
+
     var options = {
         url: 'http://aus01-phx01.cm.emm.local:8080/analyticswebapp/welcome.do',
         form: form_data
@@ -31,59 +39,136 @@ form_data = {
         if (err) {
             console.log(err);
         } else {
+            //make workspace visible request 
+
+
+
 
             var cookie = res.headers['set-cookie'];
             //console.log(cookie);
-            var dateArray = ["20141027","20141027"];
-           var matrixOfMatrices = [[[]]];
-           var count = 0;
-           for(i =0; i< dateArray.length;i++){
-            console.log(dateArray[i]);
-          generateMatrix(dateArray[i],cookie, function(matrix){
+            //
+            var dateArray = [["20141015","20141015","DAILY"],["20141024","20141024","DAILY"],["20141026","20141026","DAILY"],["20141027","20141027","DAILY"],["20141023","20141023","DAILY"],["20141022","20141022","DAILY"],["20141021","20141021","DAILY"]];
+          
 
-                matrixOfMatrices.push(matrix);
-                count +=1;
-                if(count  === dateArray.length){
-                    pareMatrixOfMatrices(matrixOfMatrices);
+         // request.post(workborkOptions, function (err, res, body) {
 
-                }
+                //  if(err){
+                 //   console.log(err);
+                //  }
 
-          });
-        }
-
-
+                //  else{
+                  
+                  
+                  var matrixOfMatrices = [[[]]];
+                  var count = 0;
+           
 
 
+                    for(i =0; i< dateArray.length;i++){
+     
+                      generateMatrix(dateArray[i],cookie, function(matrix){
+
+                        matrixOfMatrices.push(matrix);
+                        count +=1;
+                      if(count  === dateArray.length){
+                           pareMatrixOfMatrices(matrixOfMatrices);
+
+                        }
+
+                      });
+                    }
+               
+                   // }
+
+
+                   // });
           }
     });
 
 function generateMatrix(date,cookie,callback){
-  form_data2 = {
-          data: {"reportPeriodType":1,"reportName":"30000001_Marketing Channels","attachmentType":"EXCEL","subject":"30000001_Marketing Channels - Daily","currentView":{"keyColumns":[{"datatype":"TEXT","columnId":"CHANNEL_NAME","isVisible":true,"title":"Marketing Channel","compareable":true,"filterable":true,"isKey":true,"avgChars":24,"isMain":false,"fieldPos":"0","trendable":true,"isSortable":true,"format":"NONE"}],"metrics":[{"datatype":"INTEGER","axisFormatter":{"isAbbrevSignToRight":true,"decimalSeparatorTo":".","thousandsSeparatorTo":",","error":null,"precision":1},"columnId":"UNIQUE_VISITORS","showCdrSummedMsg":true,"compareable":true,"format":"INTEGER","comparisonSpecifier":"A","mx_internal_uid":"B7E72808-4142-F4D6-3E6E-52F40BABC170","isMain":false,"isVisible":true,"filterable":true,"label":"Unique Visitors","isKey":false,"categories":["Visitor Metrics","Popular Metrics"],"formatter":{"actualFormatter":{"decimalSeparatorTo":".","thousandsSeparatorTo":",","error":null,"precision":0},"error":null},"noSameSessionDisplay":true,"title":"Unique Visitors","trendable":true,"fieldPos":"1","maxVal":4034,"isSortable":true,"id":"UNIQUE_VISITORS"},{"datatype":"DECIMAL","axisFormatter":{"decimalSeparatorTo":".","abbrevSpacer":"","percentSign":"%","precision":0,"isPercentSignToRight":true,"thousandsSeparatorTo":",","abbrevPlacement":4,"error":null},"columnId":"BUYERS_PER_VISITOR","compareable":true,"format":"PERCENT","comparisonSpecifier":"A","isMain":false,"isVisible":true,"filterable":true,"label":"Buyer / Visitor","isKey":false,"noCumulativeTrend":true,"formatter":{"actualFormatter":{"decimalSeparatorTo":".","error":null,"precision":2,"isPercentSignToRight":true,"thousandsSeparatorTo":",","percentSign":"%"},"error":null},"noSameSessionDisplay":true,"title":"Buyer / Visitor","trendable":true,"fieldPos":"2","maxVal":0.0235,"isSortable":true,"categories":["Commerce Metrics","Popular Metrics"],"id":"BUYERS_PER_VISITOR"},{"datatype":"DECIMAL","axisFormatter":{"alignSymbol":-1,"abbrevSpacer":"","error":null,"decimalSeparatorTo":".","currencySymbol":"$","thousandsSeparatorTo":",","abbrevPlacement":4,"precision":2},"columnId":"SALES","compareable":true,"format":"CURRENCY","comparisonSpecifier":"A","isMain":false,"isVisible":true,"filterable":true,"label":"Sales","isKey":false,"categories":["Commerce Metrics","Popular Metrics"],"formatter":{"actualFormatter":{"decimalSeparatorTo":".","error":null,"precision":2,"alignSymbol":-1,"currencySymbol":"$","thousandsSeparatorTo":","},"error":null},"noSameSessionDisplay":true,"title":"Sales","trendable":true,"fieldPos":"3","maxVal":120632.23,"isSortable":true,"id":"SALES"},{"datatype":"DECIMAL","axisFormatter":{"decimalSeparatorTo":".","abbrevSpacer":"","percentSign":"%","precision":0,"isPercentSignToRight":true,"thousandsSeparatorTo":",","abbrevPlacement":4,"error":null},"columnId":"BOUNCE_RATE","compareable":true,"title":"Bounce Rate","comparisonSpecifier":"A","isMain":false,"isVisible":true,"filterable":true,"label":"Bounce Rate","maxVal":0.595,"noCumulativeTrend":true,"formatter":{"actualFormatter":{"decimalSeparatorTo":".","error":null,"precision":2,"isPercentSignToRight":true,"thousandsSeparatorTo":",","percentSign":"%"},"error":null},"noSameSessionDisplay":true,"lowValuesGood":true,"trendable":true,"fieldPos":"4","isKey":false,"isSortable":true,"categories":["Activity Metrics","Popular Metrics"],"format":"PERCENT","id":"BOUNCE_RATE"},{"datatype":"DECIMAL","axisFormatter":{"decimalSeparatorTo":".","abbrevSpacer":"","percentSign":"%","precision":0,"isPercentSignToRight":true,"thousandsSeparatorTo":",","abbrevPlacement":4,"error":null},"columnId":"NEW_VISITOR_PCT","compareable":true,"format":"PERCENT","comparisonSpecifier":"A","isMain":false,"isVisible":true,"filterable":true,"label":"New Visitor %","isKey":false,"noCumulativeTrend":true,"formatter":{"actualFormatter":{"decimalSeparatorTo":".","error":null,"precision":2,"isPercentSignToRight":true,"thousandsSeparatorTo":",","percentSign":"%"},"error":null},"noSameSessionDisplay":true,"title":"New Visitor %","trendable":true,"fieldPos":"5","maxVal":0.8239,"isSortable":true,"categories":["Visitor Metrics","Acquisition Metrics"],"id":"NEW_VISITOR_PCT"},{"fieldPos":"6","columnId":"__ROW_KEY__"},{"fieldPos":"7","columnId":"__ROW_ACTION_AVAILABILITY__"}],"isAutomatic":true,"compares":[{"calculations":["B"],"columnId":"UNIQUE_VISITORS"},{"calculations":["B"],"columnId":"BUYERS_PER_VISITOR"},{"calculations":["B"],"columnId":"SALES"},{"calculations":["B"],"columnId":"BOUNCE_RATE"},{"calculations":["B"],"columnId":"NEW_VISITOR_PCT"},{"calculations":["B"],"columnId":"__ROW_KEY__"},{"calculations":["B"],"columnId":"__ROW_ACTION_AVAILABILITY__"}],"type":"FLAT","sorts":[{"comparisonSpecifier":"A","columnId":"UNIQUE_VISITORS","sortDirection":"DESC"}],"customAttributes":{"chartsAreaHeight":"50","cboMetrics1":"UNIQUE_VISITORS","cboMetrics3":"UNIQUE_VISITORS","origViewId":"default"},"viewName":"Default View","visibleColumns":["CHANNEL_NAME","UNIQUE_VISITORS","BUYERS_PER_VISITOR","SALES","BOUNCE_RATE","NEW_VISITOR_PCT","__ROW_KEY__","__ROW_ACTION_AVAILABILITY__"],"filter":[]},"reportURI":"/channelsummary/channelsummary.ftl","reportRequestType":"NORMAL","body":"Please find the attached report/dashboard view.\r\rThank you,\rIBM Digital Analytics\rwww.coremetrics.com","emailFrequency":"O","startDate":20141026,"to":"roofhus@gmail.com","fileName":"30000001_Marketing_Channels","endDate":20141026}
 
-              };
-            
+
 
 
             var options2 = {
               url:'http://aus01-phx01.cm.emm.local:8080/analyticswebapp/reportdata.do?method=getReportDataAsync',
               qs: {method:'getReportDataAsync'},
               headers: {Cookie: cookie},
-              form: 'data=%7B%22periodA%22%3A%7B%22endDateId%22%3A20141027%2C%22periodType%22%3A%22DAILY%22%2C%22startDateId%22%3A'+date+'%7D%2C%22reportUri%22%3A%22%2Fchannelsummary%2Fchannelsummary%2Eftl%22%2C%22rowCount%22%3A10000%2C%22startRow%22%3A1%2C%22viewID%22%3A%22default%22%7D'
+              form: 'data=%7B%22periodA%22%3A%7B%22endDateId%22%3A'+date[1]+'%2C%22periodType%22%3A%22'+date[2]+'%22%2C%22startDateId%22%3A'+date[0]+'%7D%2C%22reportUri%22%3A%22%2Fchannelsummary%2Fchannelsummary%2Eftl%22%2C%22rowCount%22%3A10000%2C%22startRow%22%3A1%2C%22viewID%22%3A%22default%22%7D'
               };
-
+            
                 request.post(options2, function (err, res, body) {
-                     var totalMatrix = JSON.parse(body).reportData[0].total;
-                   var sendMatrix = parseRawData(JSON.parse(body).reportData);
+                    //console.log(JSON.parse(body).timeout);
+                  
+
+                  if(JSON.parse(body).timeout === true){
+                    //console.log("ITS TRUE");
+                    setTimeout(function(){
+
+                      var optionsforCheck = {
+                            url: 'http://aus01-phx01.cm.emm.local:8080/analyticswebapp/reportdata.do?method=checkAsyncResult&resultId=8851904384045687904',
+                          headers: {Cookie: cookie},
+                          qs: {method:'checkAsyncResult',
+                              resultId: JSON.parse(body).resultId}
+                      };
+
+                       request.post(optionsforCheck, function (err, res, body) {
+                            console.log(body);
+                              if(err){
+                            console.log(err);
+                            }
+                        else{
+                              var totalMatrix = JSON.parse(body).reportData[0].total;
+                            var sendMatrix = parseRawData(JSON.parse(body).reportData);
                  
-                    for(i =0; i< totalMatrix.length; i ++){
-                      sendMatrix.push(totalMatrix[i]);
-                    }
+                            for(i =0; i< totalMatrix.length; i ++){
+                              sendMatrix.push(totalMatrix[i]);
+                             }
           
-                   callback(sendMatrix);
+                              callback(sendMatrix);
+                              }
 
+
+                       });
+
+
+
+
+
+
+
+
+                  }
+
+
+
+
+
+
+                      , 5000);
+
+
+
+                  }
+
+
+
+                  else{
+                             if(err){
+                            console.log(err);
+                            }
+                        else{
+                              var totalMatrix = JSON.parse(body).reportData[0].total;
+                            var sendMatrix = parseRawData(JSON.parse(body).reportData);
+                 
+                            for(i =0; i< totalMatrix.length; i ++){
+                              sendMatrix.push(totalMatrix[i]);
+                             }
+          
+                              callback(sendMatrix);
+                    }
                 
-
+                    }
                 });
       }
 
@@ -165,11 +250,8 @@ function finishedData(useMatrix){
     console.log("-----finalMatrixOne-------");
     */
 
-    console.log("-----MarketingChannels-------");
-    console.log(finalMarketingChannels(marketingChannels));
-    console.log("-----MarketingChannels-------");
-    
-    //ols.ols(finalParse(finalMatrixOne),finalMarketingChannels(marketingChannels);
+
+  ols.ols(finalParse(finalMatrixOne),finalMarketingChannels(marketingChannels));
 
   } 
 function uniq(a) {
