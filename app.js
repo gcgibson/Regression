@@ -4,6 +4,7 @@ var csv = require('fast-csv');
 var ols = require('./ols.js');
 var _ = require('underscore');
 var request = require('request');
+var fs = require('fs');
 
 
 
@@ -12,17 +13,22 @@ var rawTotal = [[]];
 
 //Start server but we only be grabbing some endpoints for now
 
-form_data = {
-        clientid: 30000001,
-        j_username: 'SoftServe',
-        j_password: 'pw41t34m',
-        language: 'en_US',
-        loginrequest: 'true',
-        test: 'false',
-        testMode: 'false'
-    };
+
+fs.readFile('/home/gcgibson/Desktop/formConfig.json','utf-8', function(err,formData){
 
 
+
+
+fs.readFile('./dates.txt', 'utf8', function (err,data) {
+  if (err) {
+    return console.log(err);
+  }
+    var rows = data.split("\n");
+    var dateMatrix = [[]];
+    for(i = 0; i <rows.length; i++){
+      dateMatrix.push( rows[i].split(","));
+  }
+  dateMatrix.shift();
 
     var workborkOptions = {
           url: 'http://aus01-phx01.cm.emm.local:8080/analyticswebapp/reportview.do?method=addViewToWorkbook',
@@ -32,8 +38,9 @@ form_data = {
 
     var options = {
         url: 'http://aus01-phx01.cm.emm.local:8080/analyticswebapp/welcome.do',
-        form: form_data
+        form: JSON.parse(formData)
     };
+
 
     request.post(options, function (err, res, body) {
         if (err) {
@@ -47,7 +54,8 @@ form_data = {
             var cookie = res.headers['set-cookie'];
             //console.log(cookie);
             //
-            var dateArray = [["20141015","20141015","DAILY"],["20141024","20141024","DAILY"],["20141026","20141026","DAILY"],["20141027","20141027","DAILY"],["20141023","20141023","DAILY"],["20141022","20141022","DAILY"],["20141021","20141021","DAILY"]];
+            var dateArray = dateMatrix;
+            //console.log(dateArray);
           
 
          // request.post(workborkOptions, function (err, res, body) {
@@ -85,6 +93,9 @@ form_data = {
           }
     });
 
+
+});
+});
 function generateMatrix(date,cookie,callback){
 
 
