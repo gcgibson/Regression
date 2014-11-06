@@ -55,15 +55,32 @@ node.setProbabilityMatrix(Xray,
 
 
 });
+var nodes= [];
+nodes.push(Pollution);
+nodes.push(Smoker);
+nodes.push(Cancer);
+nodes.push(Dysnopea);
+nodes.push(Xray);
+
 
 //Populate edges
-var edge1 = createEdge('Pollution','Cancer');
-var edge2 = createEdge('Smoker','Cancer');
-var edge3 = createEdge('Cancer','Xray');
-var edge4 = createEdge('Cancer','Dysnopea');
+var edge1 = edge.createEdge('Pollution','Cancer');
+var edge2 = edge.createEdge('Smoker','Cancer');
+var edge3 = edge.createEdge('Cancer','Xray');
+var edge4 = edge.createEdge('Cancer','Dysnopea');
 
 
-//Caclculate Conditional Probability nodes
+//Bayesian inference 
+
+//   Belief(X=x) = \alpha P(X=x) llh(X=x)
+
+//create pi and lambda functions matrix 
+var matrix = [[]];
+
+for(i = 0; i  <nodes.length;i++){
+	
+}
+
 
 
 
