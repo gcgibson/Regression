@@ -1,88 +1,310 @@
 var node = require('./node.js');
 var edge = require('./edge.js');
+var async = require('async');
+var numeric = require('numeric');
 
 
 //Initial marginal probability nodes 
-var Pollution = node.createNode('Pollution');
-node.setProbabilityMatrix(Pollution,
+var Raining = node.createNode('Raining');
+node.setProbabilityMatrix(Raining,
 {
-	'unconditional':{'low':.9,'high':.1}}
+	'unconditional':{'true':.2,'false':.8}}
 
 
 
 );
 
-var Smoker = node.createNode('Smoker');
-node.setProbabilityMatrix(Smoker,
+var Sprinkler = node.createNode('Sprinkler');
+node.setProbabilityMatrix(Sprinkler,
 {
-	'unconditional':{'true':.3,'false':.7}}
+	'unconditional':{'true':.1,'false':.9}}
 
 
 );
 
 
-var Cancer = node.createNode('Smoker');
-node.setProbabilityMatrix(Smoker,
+var Holmes = node.createNode('Holmes');
+node.setProbabilityMatrix(Holmes,
 {
 
-	'P=H & S=T':{'true':.05,'false':.95},
-	'P=H & S=F':{'true':.02,'false':.98},
-	'P=L & S=T':{'true':.03,'false':.97},
-	'P=L & S=F':{'true':.001,'false':.999}
+	'R=Y & S=Y':{'true':1,'false':0},
+	'R=N & S=Y':{'true':.9,'false':.1},
+	'R=Y & S=N':{'true':1,'false':0},
+	'R=N & S=N':{'true':0,'false':1}
 
 
 
 });
 
-var Dysnopea = node.createNode('Dysnopea');
-node.setProbabilityMatrix(Dysnopea,
+var Watson = node.createNode('Watson');
+node.setProbabilityMatrix(Watson,
 {
 
-	'C=T':{'true':.65,'false':.35},
-	'C=F':{'true':.30,'false':.7}
+	'R=T':{'true':1,'false':0},
+	'R=F':{'true':.2,'false':.8}
 
 
 
 });
 
-var Xray = node.createNode('Xray');
-node.setProbabilityMatrix(Xray,
-{
 
-	'C=T':{'true':.9,'false':.1},
-	'C=F':{'true':.2,'false':.8}
-
-
-
-});
 var nodes= [];
-nodes.push(Pollution);
-nodes.push(Smoker);
-nodes.push(Cancer);
-nodes.push(Dysnopea);
-nodes.push(Xray);
+nodes.push(Raining);
+nodes.push(Sprinkler);
+nodes.push(Holmes);
+nodes.push(Watson);
+
 
 
 //Populate edges
-var edge1 = edge.createEdge('Pollution','Cancer');
-var edge2 = edge.createEdge('Smoker','Cancer');
-var edge3 = edge.createEdge('Cancer','Xray');
-var edge4 = edge.createEdge('Cancer','Dysnopea');
+var edge1 = edge.createEdge('Raining','Watson');
+var edge2 = edge.createEdge('Raining','Holmes');
+var edge3 = edge.createEdge('Sprinkler','Holmes');
+
+var edges= [];
+edges.push(edge1);
+edges.push(edge2);
+edges.push(edge3);
 
 
-//Bayesian inference 
 
-//   Belief(X=x) = \alpha P(X=x) llh(X=x)
+var beliefMatrix = {};
+repeater(0);
 
-//create pi and lambda functions matrix 
-var matrix = [[]];
 
-for(i = 0; i  <nodes.length;i++){
+//Calculate initial belief matrix
+function constructProbabilityMatrix(node,callback){
+
+	var nodeName = node.name;
 	
+	
+	
+	var nodeJson = {};
+	//if we are starting at an nconditional node 
+	if(node.probabilityMatrix.unconditional){
+		//beliefMatrix[nodeName] = {belief_x:[nodes[i].probabilityMatrix.unconditional.true,nodes[i].probabilityMatrix.unconditional.false],pie_x:[nodes[i].probabilityMatrix.unconditional.true,nodes[i].probabilityMatrix.unconditional.false],lambda_x:[1,1]};
+	}
+
+	else{
+		//console.log('calling pie x on' + node.name);
+			pie_x(node);
+		//beliefMatrix[nodeName] = {belief_x:null,pie_x:null,lambda_x:[1,1]};
+
+
+	
+	}
+	
+
+	callback();
+		
+}
+
+function repeater(i) {
+
+  if( i < nodes.length ) {
+  	//console.log(i + ',' + nodes.length);
+     constructProbabilityMatrix( nodes[i],function(){
+       repeater( i + 1 )
+     })
+  }
 }
 
 
 
+
+function lambda_x(node){
+	for(i = 0; i < edges.length; i++){
+		if(node.name === edges[i].from){
+			beliefMatrix[node.name] *= beliefMatrix[edges[i].from];
+		}
+	}
+}
+
+function pie_x(node){
+	
+	
+		var prob = node.probabilityMatrix; 
+
+
+			var parents = [];
+
+			for(i = 0; i <edges.length; i++){
+				if(edges[i].to === node.name){
+					var nodeOfFromNode = edges[i].from;
+					for(j = 0; j<nodes.length; j++){
+						if(nodes[j].name ===nodeOfFromNode){
+							parents.push(nodes[j]);
+						}
+					}
+				}
+			}
+				
+			
+			
+					
+			
+
+					var parentConditionalVector = [];
+					for (i = 0; i < parents.length; i++){
+						for (key in parents[i].probabilityMatrix.unconditional){
+							parentConditionalVector.push(parents[i].probabilityMatrix.unconditional[key]);
+						}
+					}
+
+					var childConditionalVector = [];
+					for (key in node.probabilityMatrix){
+						for(condition in node.probabilityMatrix[key]){
+							childConditionalVector.push(node.probabilityMatrix[key][condition]);
+						}
+
+					}
+					
+					var updatedPi = customDotProduct(childConditionalVector,parentConditionalVector,parents.length,node);
+					
+
+
+				
+
+
+
+				
+	
+
+
+			
+			
+		
+	
+
+
+}
+
+
+
+updatePriors();
+console.log();
+console.log();
+console.log('--Original Probability Matrix --');
+
+console.log();
+console.log(beliefMatrix);
+console.log('----');
+console.log();
+console.log();
+
+
+
+console.log();
+console.log();
+console.log();
+console.log();
+console.log('------Supose one morning when Homes leaves his house, he realises that his grass is wet-----');
+
+beliefMatrix.Holmes.lambda_x = [1,0];
+
+console.log();
+console.log(beliefMatrix);
+console.log('----');
+console.log();
+console.log();
+
+
+
+
+function updatePriors(){
+	for(i=0; i< nodes.length; i++){
+		if(nodes[i].probabilityMatrix.unconditional){
+			var priorVector = [];
+			for (var key in nodes[i].probabilityMatrix.unconditional) {
+  				if (nodes[i].probabilityMatrix.unconditional.hasOwnProperty(key)) {
+    			priorVector.push(nodes[i].probabilityMatrix.unconditional[key]);
+  				}
+			}
+			beliefMatrix[nodes[i].name] = {belief_x:priorVector,pie_x:priorVector,lambda_x:[1,1]}
+
+		}
+	}
+
+}
+ function customDotProduct(a,b,parentsLength,node) {
+	
+	
+	//console.log(a);
+	
+	var aEvens = [];
+	var aOdds = [];
+	for(i =0; i < a.length; i+=2){
+		aEvens.push(a[i]);
+		aOdds.push(a[i+1]);
+
+	}
+
+	
+	var total = [[]];
+	total.push(aEvens);
+	total.push(aOdds);
+	total.shift();
+
+	
+	var priorMatrix = [[]];
+	for(i=0; i < b.length; i+=parentsLength){
+		priorMatrix.push(b.slice(i,i+parentsLength));
+
+	}
+	priorMatrix.shift();
+
+
+	//console.log(total);
+	//console.log(priorMatrix);
+
+	if(parentsLength ===2){
+		var resultVector = [];
+		for(iter=0;iter<total.length;iter++){
+			var product1 = 0;
+			var count = 0;
+			for(i =0 ; i < priorMatrix.length; i +=2){
+				var first = priorMatrix[i];
+				var second = priorMatrix[i+1];
+				
+				for (j = 0; j < first.length; j++){
+					for(k=0; k < second.length; k ++){
+						//console.log(first[k] + "  " +  second[j] + "  " + total[iter][count] );
+						product1 = first[k]*second[j]*total[iter][count] +product1;
+						count +=1;
+					}
+				}
+
+			}
+			resultVector.push(product1);
+
+		
+		}
+	}
+	if(parentsLength ===1){
+		var resultVector = [];
+		// console.log("Watson--------");
+		// console.log(total);
+		// console.log(priorMatrix);
+
+		for(i = 0; i < priorMatrix.length; i++){
+			var product1 = 0;
+			for(j=0; j < total[i].length; j++){
+				//console.log(priorMatrix[i][0]+ " "+total[i][j]);
+				product1 = priorMatrix[j][0]*total[i][j]+product1;
+			}
+			resultVector.push(product1);
+		}
+		
+		
+	}
+	
+	beliefMatrix[node.name] = {belief_x:resultVector,pie_x:resultVector,lambda_x:[1,1]}
+
+	//process.exit();
+
+
+
+ }
 
 
 
