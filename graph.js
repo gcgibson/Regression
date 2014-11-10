@@ -3,6 +3,10 @@ var edge = require('./edge.js');
 var async = require('async');
 var numeric = require('numeric');
 
+/*
+
+TODO : FIX EVEN AND ODS FUNCTION TO RETURN FOR PARENT LENGTHS > 2
+*/
 
 //Initial marginal probability nodes 
 var Raining = node.createNode('Raining');
@@ -207,9 +211,166 @@ console.log(beliefMatrix);
 console.log('----');
 console.log();
 console.log();
+updateLambda(nodes[2]);
+
+//To calculate the update of \lambda a node N
+
+function updateLambda(node){
+	var nodeName = node.name;
+	var nodeBeliefMatrix =beliefMatrix[nodeName];
+	var updatedLambdaVector = nodeBeliefMatrix.lambda_x;
+	
+	var parents = [];
+	for(i = 0; i < edges.length; i++){
+		var possibleNodeName= edges[i].from;
+		for(j = 0; j<nodes.length; j++){
+			if(nodes[j].name ===possibleNodeName){
+				parents.push(nodes[j]);
+			}
+		}
+
+	}
+	parents.shift();
+	var parentsLength = parents.length;
+
+
+	var priorVector = [];
+	for (var key in node.probabilityMatrix) {
+		for (var secondKey in node.probabilityMatrix[key]){
+			priorVector.push(node.probabilityMatrix[key][secondKey]);
+		}
+  		
+	}
+
+	var total = [[]];
+	var priorVectorEvens = [];
+	var priorVectorOdds = [];
+	for(i =0; i < priorVector.length; i+=2){
+		priorVectorEvens.push(priorVector[i]);
+		priorVectorOdds.push(priorVector[i+1]);
+
+	}
+
+	total.push(priorVectorEvens);
+	total.push(priorVectorOdds);
+	total.shift();
+	//Just one parent
+	var parentBeliefMatrix = beliefMatrix[parents[1].name];
+
+	var priorBeliefVector = parentBeliefMatrix.pie_x;
+
+
+	for(i =0; i<total.length; i++){
+			var tmpLength = total[i].length;
+			console.log(updatedLambdaVector);
+			var priorVectorEvens = [];
+			//console.log(total[i]);
+		var vectorOdds = [];
+		var vectorEvens = [];
+
+		for(j =0; j < tmpLength; j+=2){
+
+			vectorEvens.push(total[i][j]);
+			vectorOdds.push(total[i][j+1]);
+
+		}
+		var evenResult = 0;
+
+		for (i =0; i<updatedLambdaVector.length; i++){
+			for(j=0; j<vectorEvens.length;j++){
+				for(k = 0;k<priorBeliefVector.length;k++){
+					//console.log(updatedLambdaVector[i] + " " + vectorEvens[j] + " " + priorBeliefVector[k]);
+					if(j===k){
+					evenResult += updatedLambdaVector[i]*vectorEvens[j]*priorBeliefVector[k];
+					}
+				}
+			}
+		}
+		var oddResult = 0;
+
+		for (i =0; i<updatedLambdaVector.length; i++){
+			for(j=0; j<vectorEvens.length;j++){
+				for(k = 0;k<priorBeliefVector.length;k++){
+					
+											//console.log(updatedLambdaVector[i] + " " + vectorOdds[j] + " " + priorBeliefVector[k]);
+					if(j===k){
+					oddResult += updatedLambdaVector[i]*vectorOdds[j]*priorBeliefVector[k];
+					}
+				}
+			}
+		}
+
+		console.log();
+		var firstResultVector = [evenResult,oddResult];
+	
+
+		console.log();
+
+		var otherParentBeliefMatrix = beliefMatrix[parents[0].name];
+		var otherPriorBeliefVector = otherParentBeliefMatrix.pie_x;
+
+	
+		//console.log(total);
+		var first = total[0];
+		var second = total[1];
+	
+		var firstHalfOfFirst = [];
+		var secondHalfOfFirst = [];
+		var firstHalfOfSecond = [];
+		var secondHalfOfSecond = [];
+
+		for(i = 0; i<2; i++){
+			firstHalfOfFirst.push(first[i]);
+		}
+
+		for(i = 0; i<2; i++){
+			secondHalfOfFirst.push(second[i]);
+		}
+		for(i = 2; i<4; i++){
+			firstHalfOfSecond.push(first[i]);
+		}
+		for(i = 2; i<4; i++){
+			secondHalfOfSecond.push(second[i]);
+		}
+
+		var firstHalf = firstHalfOfFirst.concat(secondHalfOfFirst);
+		var secondHalf = firstHalfOfSecond.concat(secondHalfOfSecond);
+	
+
+		var resultVector= [];
+		var sum1 = 0;
+		for(i=0;i<updatedLambdaVector.length;i++ ){
+			for(j=0;j<firstHalf.length; j++){
+				for(k=0;k<otherPriorBeliefVector.length;k++){
+					if(j===k){
+						sum1+=updatedLambdaVector[i]*firstHalf[j]*otherPriorBeliefVector[k];
+					}
+				}
+			}
+		}
+		resultVector.push(sum1);
+
+		var sum2 = 0;
+		for(i=0;i<updatedLambdaVector.length;i++ ){
+			for(j=0;j<secondHalf.length; j++){
+				for(k=0;k<otherPriorBeliefVector.length;k++){
+					if(j===k){
+						sum2+=updatedLambdaVector[i]*secondHalf[j]*otherPriorBeliefVector[k];
+					}
+				}
+			}
+		}
+		resultVector.push(sum2);
+		//updated lambdas
+		console.log(firstResultVector);
+		console.log(resultVector);
+
+
+	}
 
 
 
+}
 
 function updatePriors(){
 	for(i=0; i< nodes.length; i++){
