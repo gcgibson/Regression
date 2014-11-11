@@ -205,6 +205,8 @@ console.log();
 console.log('------Supose one morning when Homes leaves his house, he realises that his grass is wet-----');
 
 beliefMatrix.Holmes.lambda_x = [1,0];
+beliefMatrix.Holmes.pie_x = [0.272, 0.728];
+beliefMatrix.Holmes.belief_x = [1,0];
 
 console.log();
 console.log(beliefMatrix);
@@ -362,8 +364,76 @@ function updateLambda(node){
 		}
 		resultVector.push(sum2);
 		//updated lambdas
+
 		console.log(firstResultVector);
 		console.log(resultVector);
+		 var resultMatrix= [[]];
+		 resultMatrix.push(firstResultVector);
+		 resultMatrix.push(resultVector);
+
+		var tmpBeliefMatrix = {};
+		for(j= 0; j <nodes.length; j++){
+
+				tmpBeliefMatrix[nodes[j].name] = {};
+
+				for(i = 0; i < edges.length; i++){
+
+					if(nodes[j].name === edges[i].to){
+						if(nodes[j].name === node.name){
+							var val = resultMatrix[j];
+							tmpBeliefMatrix[nodes[j].name][edges[i].from]={lambda_x:val,pie_x:null}; 
+						}
+						else{
+						tmpBeliefMatrix[nodes[j].name][edges[i].from]={lambda_x:[1,1],pie_x:null}; 
+						}
+
+					}
+					else{
+						//tmpBeliefMatrix[nodes[j].name] = null;
+
+					}
+				}
+		}
+		console.log('HEREER _________________________________-');
+		var normalizingConstant = 1;
+		//console.log(tmpBeliefMatrix);
+		//Now we have temporary bleief matrix so we can go back and calculate pie_x values according to 
+		//
+
+		//compute alpha
+	//console.log(beliefMatrix);
+		//blief = alpha*pie*lambd
+	
+		var alphaBeliefVector = beliefMatrix[node.name].belief_x;
+		var alphaBeliefVal = alphaBeliefVector[0];
+
+		var alphaPieVector = beliefMatrix[node.name].pie_x;
+		var alphaPieVal = alphaPieVector[0];
+
+		var alphaLambdaVector = beliefMatrix[node.name].lambda_x;
+		var alphaLambdaVal = alphaLambdaVector[0];
+
+		var alpha = alphaBeliefVal/(alphaPieVal*alphaLambdaVal);
+		
+
+				console.log(tmpBeliefMatrix);
+		
+		console.log('"----------------------"');
+		//update parentless nodes
+		console.log(tmpBeliefMatrix);
+		for(key in beliefMatrix){
+			for(i =0; i < nodes.length; i ++){
+				if(nodes[i].name === key && nodes[i].probabilityMatrix.unconditional){
+					console.log(alpha + " " + beliefMatrix[key].lambda_x[1] + "  "+ beliefMatrix[key].pie_x[1]);
+					beliefMatrix[key].belief_x[0] = alpha*tmpBeliefMatrix[node.name][key].lambda_x[0]*tmpBeliefMatrix[node.name][key].pie_x[0];
+					beliefMatrix[key].belief_x[1] = alpha*tmpBeliefMatrix[node.name][key].lambda_x[1]*tmpBeliefMatrix[node.name][key].pie_x[1];
+				}
+			}
+
+		}
+
+
+			console.log(beliefMatrix);
 
 
 	}
