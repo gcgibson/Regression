@@ -365,12 +365,11 @@ function updateLambda(node){
 		resultVector.push(sum2);
 		//updated lambdas
 
-		console.log(firstResultVector);
-		console.log(resultVector);
+	
 		 var resultMatrix= [[]];
 		 resultMatrix.push(firstResultVector);
 		 resultMatrix.push(resultVector);
-
+		 console.log(beliefMatrix);
 		var tmpBeliefMatrix = {};
 		for(j= 0; j <nodes.length; j++){
 
@@ -381,10 +380,13 @@ function updateLambda(node){
 					if(nodes[j].name === edges[i].to){
 						if(nodes[j].name === node.name){
 							var val = resultMatrix[j];
-							tmpBeliefMatrix[nodes[j].name][edges[i].from]={lambda_x:val,pie_x:null}; 
+							//console.log("this is my edges froms" + edges[i].from + "with node " + nodes[j].name);
+							//get conditional probability matrix 
+
+							tmpBeliefMatrix[nodes[j].name][edges[i].from]={lambda_x:val,pie_x:beliefMatrix[edges[i].from].pie_x}; 
 						}
 						else{
-						tmpBeliefMatrix[nodes[j].name][edges[i].from]={lambda_x:[1,1],pie_x:null}; 
+						tmpBeliefMatrix[nodes[j].name][edges[i].from]={lambda_x:[1,1],pie_x:beliefMatrix[edges[i].from].pie_x}; 
 						}
 
 					}
@@ -394,7 +396,7 @@ function updateLambda(node){
 					}
 				}
 		}
-		console.log('HEREER _________________________________-');
+		
 		var normalizingConstant = 1;
 		//console.log(tmpBeliefMatrix);
 		//Now we have temporary bleief matrix so we can go back and calculate pie_x values according to 
@@ -416,24 +418,93 @@ function updateLambda(node){
 		var alpha = alphaBeliefVal/(alphaPieVal*alphaLambdaVal);
 		
 
-				console.log(tmpBeliefMatrix);
+				
 		
 		console.log('"----------------------"');
 		//update parentless nodes
-		console.log(tmpBeliefMatrix);
-		for(key in beliefMatrix){
-			for(i =0; i < nodes.length; i ++){
-				if(nodes[i].name === key && nodes[i].probabilityMatrix.unconditional){
-					console.log(alpha + " " + beliefMatrix[key].lambda_x[1] + "  "+ beliefMatrix[key].pie_x[1]);
-					beliefMatrix[key].belief_x[0] = alpha*tmpBeliefMatrix[node.name][key].lambda_x[0]*tmpBeliefMatrix[node.name][key].pie_x[0];
-					beliefMatrix[key].belief_x[1] = alpha*tmpBeliefMatrix[node.name][key].lambda_x[1]*tmpBeliefMatrix[node.name][key].pie_x[1];
+		for(var key in tmpBeliefMatrix){
+			if(key === 'Holmes'){
+				for(var subkey in tmpBeliefMatrix[key] ){
+					//console.log("WHAT THE ACTUAL FUCK ");
+					//console.log(tmpBeliefMatrix[key]);
+					
+
+						tmpBeliefMatrix[key].Raining.lambda_x= firstResultVector;
+
+
+					
+
+
 				}
 			}
-
 		}
+		
+		//not sure how this function should actually work
+		
+		
+
+
+	
+		//this right here needs to be abstracted but it won't be easy
+		tmpBeliefMatrix['Watson']['Raining'].lambda_x[0]=  alpha*tmpBeliefMatrix['Holmes']['Raining'].lambda_x[0]*tmpBeliefMatrix['Holmes']['Raining'].pie_x[0];
+		tmpBeliefMatrix['Watson']['Raining'].lambda_x[1]=  alpha*tmpBeliefMatrix['Holmes']['Raining'].lambda_x[1]*tmpBeliefMatrix['Holmes']['Raining'].pie_x[1];
+
+		
+
+		//finally update Watsons belief value by taking the onditional versus 
+		console.log("---------------------");
+		var vectorMatrix = [[]];
+		for(var key in nodes){
+			if(nodes[key].name === 'Watson'){
+				console.log(nodes[key].probabilityMatrix);
+				for(var subkey in nodes[key].probabilityMatrix){
+					var array= [];
+					for(var subsubkey in  nodes[key].probabilityMatrix[subkey]){
+						array.push(nodes[key].probabilityMatrix[subkey][subsubkey]);
+					}
+					vectorMatrix.push(array);
+
+				}
+			}
+		}
+		vectorMatrix.shift();
+		
+		//final computation is to get the fold of the conditional probabilities and the updated pie
+
+		var tmpVect =  tmpBeliefMatrix['Watson']['Raining'].lambda_x;
+
+		console.log(numeric.transpose(vectorMatrix));
+		console.log(tmpVect);
+		var resultVector2 = [];
+		for(i=0; i < numeric.transpose(vectorMatrix).length; i++){
+			var tmp1 = 0;
+			for(j=0; j < numeric.transpose(vectorMatrix)[i].length; j++){
+				console.log(tmpVect[j] +  "    " + numeric.transpose(vectorMatrix)[i][j]);
+				tmp1+=tmpVect[j]*numeric.transpose(vectorMatrix)[i][j];
+			
+			}	
+			//console.log(tmp1);
+
+			resultVector2.push(tmp1);
+		}
+			
+
+			beliefMatrix['Watson'].belief_x = resultVector2;
+			beliefMatrix['Watson'].pie_x = resultVector2;
+				beliefMatrix['Raining'].belief_x = tmpVect;
+
+			beliefMatrix['Holmes'].belief_x = beliefMatrix['Holmes'].lambda_x;
 
 
 			console.log(beliefMatrix);
+
+
+
+
+
+
+
+			
 
 
 	}
@@ -441,6 +512,7 @@ function updateLambda(node){
 
 
 }
+
 
 function updatePriors(){
 	for(i=0; i< nodes.length; i++){
